@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { v7: uuidv7 } = require("uuid");
+const { v4: uuidv4 } = require("uuid");
 const { fetchExternalData } = require("../services/externalApis");
 const { getAgeGroup, getTopCountry } = require("../utils/classification");
 const { get, all, run } = require("../db/db");
@@ -63,7 +63,7 @@ router.post("/", async (req, res) => {
     }
 
     const profile = {
-      id: uuidv7(),
+      id: uuidv4(),
       name: lowerName,
       gender: gender.gender,
       gender_probability: gender.probability,
