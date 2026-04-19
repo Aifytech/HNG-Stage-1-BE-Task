@@ -3,18 +3,22 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "HNG Stage 1 backend — profile service backed by MongoDB and three name-inference APIs.",
   "dependencies": {
-    "axios": "^1.15.0",
-    "cors": "^2.8.6",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^5.2.1",
-    "sqlite3": "^6.0.1",
-    "uuid": "^3.4.0"
+    "mongoose": "^8.8.0",
+    "uuid": "^11.0.3"
   }
 }

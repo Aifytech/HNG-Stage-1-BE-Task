@@ -11,21 +11,22 @@ This project is a RESTful API that accepts a name, enriches it using multiple ex
 * Fetches data from **3 external APIs**
 * Classifies age into groups
 * Determines most probable nationality
-* Stores results in a database (SQLite)
+* Stores results in **MongoDB** (via Mongoose)
 * Prevents duplicate entries (idempotent)
 * Supports filtering via query parameters
 * Full CRUD support (Create, Read, Delete)
-* Robust error handling
+* UUID v7 identifiers, ISO 8601 UTC timestamps
+* Deployable on Vercel as a single serverless function
 
 ---
 
 ## Tech Stack
 
-* Node.js
-* Express.js
-* SQLite
+* Node.js (>= 18)
+* Express.js 5
+* MongoDB + Mongoose
 * Axios
-* UUID
+* UUID v7
 
 ---
 
@@ -41,8 +42,9 @@ This project is a RESTful API that accepts a name, enriches it using multiple ex
 
 ```bash
 git clone <your-repo-url>
-cd name-profile-api
+cd HNG-Stage-1-BE-Task
 npm install
+cp .env.example .env   # then fill in MONGODB_URI
 npm start
 ```
 
@@ -51,6 +53,27 @@ Server runs at:
 ```
 http://localhost:3000
 ```
+
+### Required environment variables
+
+| Variable       | Purpose                                 |
+| -------------- | --------------------------------------- |
+| `MONGODB_URI`  | MongoDB connection string (required)    |
+| `PORT`         | Local dev port (default `3000`)         |
+
+---
+
+## Deploying to Vercel
+
+The project is Vercel-ready:
+
+1. Push the repo to GitHub.
+2. Import the repo in Vercel.
+3. Set `MONGODB_URI` in **Project → Settings → Environment Variables**.
+4. Deploy. All traffic is routed to `api/index.js` via [vercel.json](vercel.json).
+
+The Mongo connection is cached across lambda invocations
+([db/db.js](db/db.js)) so cold starts do not open a fresh pool per request.
 
 ---
 
@@ -183,9 +206,9 @@ If a profile with the same name already exists:
 
 ## Data Storage
 
-* SQLite database (`database.sqlite`)
-* Unique constraint on `name`
-* UUID used for IDs
+* MongoDB via Mongoose (`profiles` collection)
+* Unique index on `name` — duplicate inserts are caught and return the existing row
+* `_id` stores a UUID v7 string; API responses project it to `id`
 * Timestamps in ISO 8601 (UTC)
 
 ---

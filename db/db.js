@@ -1,52 +1,29 @@
-const sqlite3 = require("sqlite3").verbose();
-const path = require('path');
+const mongoose = require("mongoose");
 
-const db = new sqlite3.Database(
-  path.join(process.cwd(), 'database.sqlite')
-);
+// Cache the connection across invocations so serverless cold starts don't open
+// a fresh pool every time. The global is intentional: Vercel reuses the
+// Node process between invocations of the same lambda instance.
+let cached = global.__mongoose;
+if (!cached) cached = global.__mongoose = { conn: null, promise: null };
 
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS profiles (
-      id TEXT PRIMARY KEY,
-      name TEXT UNIQUE,
-      gender TEXT,
-      gender_probability REAL,
-      sample_size INTEGER,
-      age INTEGER,
-      age_group TEXT,
-      country_id TEXT,
-      country_probability REAL,
-      created_at TEXT
-    )
-  `);
-});
+async function connect() {
+  if (cached.conn) return cached.conn;
 
-const get = (sql, params = []) => {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  });
-};
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error("MONGODB_URI is not set. Add it to your environment or .env file.");
+  }
 
-const all = (sql, params = []) => {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
-};
+  if (!cached.promise) {
+    cached.promise = mongoose
+      .connect(uri, {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 8000,
+      })
+      .then((m) => m);
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
 
-const run = (sql, params = []) => {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve(this);
-    });
-  });
-};
-
-module.exports = { get, all, run};
+module.exports = { connect };
