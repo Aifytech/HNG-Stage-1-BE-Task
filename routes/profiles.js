@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
       });
     }
 
-    if (age.age === null) {
+    if (!age || age.age === null) {
       return res.status(502).json({
         status: "error",
         message: "Agify returned an invalid response",
@@ -137,7 +137,7 @@ router.get("/", async (req, res) => {
 
   if (country_id) {
     query += " AND LOWER(country_id) = ?";
-    params.push(country_id.loLowerCase());
+    params.push(country_id.toLowerCase());
   }
 
   if (age_group) {
